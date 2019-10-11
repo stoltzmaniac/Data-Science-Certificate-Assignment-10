@@ -1,0 +1,93 @@
+---
+title: "Assignment"
+author: "Scott Stoltzman"
+date: "6/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library('tidyverse')
+library('caret')
+```
+
+
+# Assignment  
+
+You are on a crack squad of a group looking into whether or not reviews came from the USA. This field in your data set is `review_from_usa` and is either `TRUE` or `FALSE`. Use the data and a logistic regression model to predict whether or not the review is coming from the USA. Describe your process along the way and use best practices that you have learned so far.
+
+
+## Before Starting:
+Read about the data at <https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-06-04>
+
+```{r}
+ramen_ratings <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-04/ramen_ratings.csv")
+
+dat = ramen_ratings %>%
+  mutate(review_from_usa = country == 'United States') %>%
+  select(-country)
+
+# Select useful variables and make factors of characters
+dat_clean = dat %>%
+  select(-review_number) %>%
+  mutate(brand = as.factor(brand), 
+         variety = as.factor(variety),
+         style = as.factor(style),
+         review_from_usa = as.factor(review_from_usa)) %>%
+  rename(Class = review_from_usa) %>%
+  select(-variety, -brand) %>%
+  drop_na()
+
+dat_clean
+```
+
+
+```{r}
+dat_clean %>%
+  group_by(Class) %>%
+  summarize(n = n()) %>%
+  ggplot(aes(x = Class, y = n)) + 
+  geom_col() + 
+  geom_label(aes(label = n))
+```
+
+
+```{r}
+set.seed(123)
+
+dat_to_split = dat_clean %>%
+  mutate(id = row_number())
+
+dat_train = dat_to_split %>%
+  sample_n(2900)
+
+dat_test = dat_to_split %>%
+  anti_join(dat_train, by = 'id')
+
+dat_test = dat_test %>% select(-id)
+dat_train = dat_train %>% select(-id)
+```
+
+
+```{r}
+train_control = trainControl(
+    method = "cv", number = 5
+  )
+
+model = train(
+  Class ~ ., 
+  data = dat_train,
+  method = "glm",
+  family = "binomial",
+  trControl = train_control
+)
+
+
+predictions = predict(model, newdata = dat_test, type = 'raw')
+actuals = dat_test$Class
+
+confusionMatrix(predictions, actuals)
+```
+
+
+# What did we miss??
