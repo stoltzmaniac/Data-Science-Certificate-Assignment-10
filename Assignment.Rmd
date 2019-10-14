@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library('tidyverse')
+library('caret')
 ```
 
 
@@ -26,28 +27,34 @@ dat = ramen_ratings %>%
   mutate(review_from_usa = country == 'United States') %>%
   select(-country)
 
-dat
+# Select useful variables and make factors of characters
+dat_clean = dat %>%
+  select(-review_number) %>%
+  mutate(brand = as.factor(brand), 
+         variety = as.factor(variety),
+         style = as.factor(style),
+         review_from_usa = as.factor(review_from_usa)) %>%
+  rename(Class = review_from_usa) %>%
+  select(-variety, -brand) %>%
+  drop_na()
+
+dat_clean
 ```
 
-
-
-
-# Begin EDA 
 
 ```{r}
-
+# Look at base rate -- balance/imbalance of Class variable
 ```
 
 
-# Expore NA values
-Show how many `NA` there are and how to interpret these `NA` values, explain what you will do with them.
-< Answer Here >
 ```{r}
-colSums(is.na(dat))
+# Test / Train split & resampling if required
 ```
 
-...clean, wrangle, filter, etc. ...
 
-...build a model...
+```{r}
+# Use caret to create a model and output confusion matrix
+```
 
-...explain your results...
+
+Describe your results.

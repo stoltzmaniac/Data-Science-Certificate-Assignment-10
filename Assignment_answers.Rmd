@@ -66,6 +66,10 @@ dat_test = dat_to_split %>%
 
 dat_test = dat_test %>% select(-id)
 dat_train = dat_train %>% select(-id)
+
+dat_train_upsample = upSample(dat_train %>% select(-Class), 
+                              dat_train$Class)
+
 ```
 
 
@@ -76,12 +80,11 @@ train_control = trainControl(
 
 model = train(
   Class ~ ., 
-  data = dat_train,
+  data = dat_train_upsample,
   method = "glm",
   family = "binomial",
   trControl = train_control
 )
-
 
 predictions = predict(model, newdata = dat_test, type = 'raw')
 actuals = dat_test$Class
@@ -90,4 +93,3 @@ confusionMatrix(predictions, actuals)
 ```
 
 
-# What did we miss??

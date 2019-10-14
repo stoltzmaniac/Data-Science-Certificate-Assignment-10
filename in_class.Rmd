@@ -16,7 +16,8 @@ Understanding Bias vs Variance
 ```{r}
 set.seed(123)
 raw_dat = ggplot2::diamonds
-dat = raw_dat %>% sample_n(1000)
+dat = raw_dat %>% 
+  sample_n(1000)
 
 dat %>%
   ggplot(aes(x = carat, y = price)) +
@@ -35,7 +36,6 @@ dat_train = dat_to_split %>%
 dat_test = dat_to_split %>%
   anti_join(dat_train, by = 'id') %>%
   sample_n(300)
-
 
 # linear fit
 mod_lin = lm(price ~ carat, data = dat_train)  
@@ -238,6 +238,7 @@ dat %>%
 
 Sampling Techniques
 ```{r}
+set.seed(123)
 dat_id = dat %>%
   mutate(id = row_number(),
          default = as.factor(default))
